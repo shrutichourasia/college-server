@@ -17,7 +17,11 @@ This directory contains Jenkins pipeline configurations for the Code-Sync projec
 3. **Git Plugin** - For source code management
 4. **Pipeline** - Core pipeline functionality
 5. **Credentials Binding** - For managing secrets
-6. **Timestamper** - For adding timestamps to console output
+
+### Optional Plugins
+
+1. **Timestamper** - Adds timestamps to console output (removed from pipelines for compatibility)
+   - If you want timestamps, install this plugin and add `timestamps()` to the `options` block in each Jenkinsfile
 
 ### Jenkins Credentials Setup
 
