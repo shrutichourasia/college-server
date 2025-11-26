@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Sync - Use Case Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .diagram-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            min-height: 600px;
+        }
+        .use-cases {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .use-case-category {
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            border-left: 4px solid #f5576c;
+        }
+        .use-case-category h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #f5576c;
+            padding-bottom: 10px;
+        }
+        .use-case-item {
+            margin: 10px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
+        .use-case-item::before {
+            content: "•";
+            position: absolute;
+            left: 5px;
+            color: #f5576c;
+            font-weight: bold;
+        }
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            border-radius: 5px;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Code Sync</h1>
+        <p class="subtitle">Use Case Diagram</p>
+        
+        <div class="diagram-container">
+            <div class="mermaid">
+graph TB
+    User[👤 User]
+    AI[🤖 AI Assistant<br/>Copilot]
+    
+    subgraph RoomManagement["Room Management"]
+        UC1[Create Room]
+        UC2[Join Room]
+        UC3[Leave Room]
+        UC4[Generate Room ID]
+        UC5[Copy Room ID]
+    end
+    
+    subgraph FileManagement["File Management"]
+        UC6[Create File]
+        UC7[Edit File]
+        UC8[Delete File]
+        UC9[Rename File]
+        UC10[Create Directory]
+        UC11[Delete Directory]
+        UC12[Rename Directory]
+        UC13[Open File]
+        UC14[Close File]
+        UC15[Download Project]
+    end
+    
+    subgraph Collaboration["Real-time Collaboration"]
+        UC16[View Cursor Positions]
+        UC17[View Typing Indicators]
+        UC18[See User Presence]
+        UC19[Synchronize Code Changes]
+    end
+    
+    subgraph CodeExecution["Code Execution"]
+        UC20[Execute Code]
+        UC21[View Execution Output]
+        UC22[Handle Execution Errors]
+    end
+    
+    subgraph Communication["Communication"]
+        UC23[Send Chat Message]
+        UC24[Receive Chat Messages]
+        UC25[View Chat History]
+    end
+    
+    subgraph Drawing["Collaborative Drawing"]
+        UC26[Draw on Canvas]
+        UC27[View Others' Drawings]
+        UC28[Switch Drawing Mode]
+    end
+    
+    subgraph AIServices["AI Services"]
+        UC29[Generate Code]
+        UC30[Analyze Code for Errors]
+        UC31[Get Code Suggestions]
+        UC32[Ask Coding Questions]
+    end
+    
+    subgraph Customization["Customization"]
+        UC33[Change Theme]
+        UC34[Adjust Font Size]
+        UC35[Change Font Family]
+        UC36[Configure Settings]
+    end
+    
+    User --> RoomManagement
+    User --> FileManagement
+    User --> Collaboration
+    User --> CodeExecution
+    User --> Communication
+    User --> Drawing
+    User --> Customization
+    User --> AIServices
+    AI --> AIServices
+    
+    style User fill:#667eea,stroke:#333,stroke-width:3px,color:#fff
+    style AI fill:#f5576c,stroke:#333,stroke-width:3px,color:#fff
+    style RoomManagement fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style FileManagement fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style Collaboration fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style CodeExecution fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style Communication fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    style Drawing fill:#e0f2f1,stroke:#00796b,stroke-width:2px
+    style AIServices fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style Customization fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+            </div>
+        </div>
+
+        <div class="use-cases">
+            <div class="use-case-category">
+                <h3>Room Management</h3>
+                <div class="use-case-item">Create Room - Generate a new collaboration room with unique ID</div>
+                <div class="use-case-item">Join Room - Enter existing room using Room ID and username</div>
+                <div class="use-case-item">Leave Room - Disconnect from current collaboration session</div>
+                <div class="use-case-item">Generate Room ID - Create unique UUID for room sharing</div>
+                <div class="use-case-item">Copy Room ID - Copy room identifier to clipboard</div>
+            </div>
+
+            <div class="use-case-category">
+                <h3>File Management</h3>
+                <div class="use-case-item">Create File - Add new file to project structure</div>
+                <div class="use-case-item">Edit File - Modify file content with real-time sync</div>
+                <div class="use-case-item">Delete File - Remove file from project</div>
+                <div class="use-case-item">Rename File - Change file name</div>
+                <div class="use-case-item">Create Directory - Add new folder to organize files</div>
+                <div class="use-case-item">Delete Directory - Remove directory and contents</div>
+                <div class="use-case-item">Rename Directory - Change directory name</div>
+                <div class="use-case-item">Open File - Open file in editor tab</div>
+                <div class="use-case-item">Close File - Close file tab</div>
+                <div class="use-case-item">Download Project - Export entire project as ZIP</div>
+            </div>
+
+            <div class="use-case-category">
+                <h3>Real-time Collaboration</h3>
+                <div class="use-case-item">View Cursor Positions - See where other users are editing</div>
+                <div class="use-case-item">View Typing Indicators - Know when others are typing</div>
+                <div class="use-case-item">See User Presence - View online/offline status</div>
+                <div class="use-case-item">Synchronize Code Changes - Real-time code updates across all users</div>
+            </div>
+
+            <div class="use-case-category">
+                <h3>Code Execution</h3>
+                <div class="use-case-item">Execute Code - Run code in multiple programming languages</div>
+                <div class="use-case-item">View Execution Output - See program output and results</div>
+                <div class="use-case-item">Handle Execution Errors - Display compilation/runtime errors</div>
+            </div>
+
+            <div class="use-case-category">
+                <h3>Communication</h3>
+                <div class="use-case-item">Send Chat Message - Send message to room participants</div>
+                <div class="use-case-item">Receive Chat Messages - Get messages from other users</div>
+                <div class="use-case-item">View Chat History - See conversation within session</div>
+            </div>
+
+            <div class="use-case-category">
+                <h3>Collaborative Drawing</h3>
+                <div class="use-case-item">Draw on Canvas - Create drawings and sketches</div>
+                <div class="use-case-item">View Others' Drawings - See collaborative drawings in real-time</div>
+                <div class="use-case-item">Switch Drawing Mode - Toggle between code and drawing views</div>
+            </div>
+
+            <div class="use-case-category">
+                <h3>AI Services</h3>
+                <div class="use-case-item">Generate Code - AI generates code based on prompts</div>
+                <div class="use-case-item">Analyze Code for Errors - AI detects bugs and issues</div>
+                <div class="use-case-item">Get Code Suggestions - AI provides improvement recommendations</div>
+                <div class="use-case-item">Ask Coding Questions - Get answers about code and programming</div>
+            </div>
+
+            <div class="use-case-category">
+                <h3>Customization</h3>
+                <div class="use-case-item">Change Theme - Switch between color schemes</div>
+                <div class="use-case-item">Adjust Font Size - Modify editor font size</div>
+                <div class="use-case-item">Change Font Family - Select preferred coding font</div>
+                <div class="use-case-item">Configure Settings - Manage all editor preferences</div>
+            </div>
+        </div>
+
+        <div class="note">
+            <strong>Actors:</strong><br/>
+            • <strong>User</strong> - Primary actor who performs most use cases including room management, file operations, collaboration, and customization.<br/>
+            • <strong>AI Assistant (Copilot)</strong> - Secondary actor that provides AI-powered code generation, analysis, and suggestions. The AI assistant responds to user queries and analyzes code files.
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#f5576c',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#d32f2f',
+                lineColor: '#f5576c',
+                secondaryColor: '#f0f0f0',
+                tertiaryColor: '#fff'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                padding: 20
+            }
+        });
+    </script>
+</body>
+</html>
+
+

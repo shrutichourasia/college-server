@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Sync - Entity Relationship Diagram (ERD)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .diagram-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .legend h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .legend-item {
+            margin: 10px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+        }
+        .legend-item strong {
+            color: #667eea;
+        }
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 5px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Code Sync</h1>
+        <p class="subtitle">Entity Relationship Diagram (ERD)</p>
+        
+        <div class="diagram-container">
+            <div class="mermaid">
+erDiagram
+    ROOM ||--o{ USER : "has"
+    ROOM ||--o{ FILE_SYSTEM_ITEM : "contains"
+    ROOM ||--o{ CHAT_MESSAGE : "contains"
+    ROOM ||--|| DRAWING_DATA : "has"
+    
+    USER ||--o| FILE_SYSTEM_ITEM : "currently_editing"
+    USER ||--o{ CHAT_MESSAGE : "sends"
+    
+    FILE_SYSTEM_ITEM ||--o{ FILE_SYSTEM_ITEM : "parent_contains"
+    
+    ROOM {
+        string roomId PK "UUID"
+        datetime createdAt
+        datetime lastActivity
+        int activeUsers
+    }
+    
+    USER {
+        string socketId PK "Unique socket connection ID"
+        string username "Display name"
+        string roomId FK "References ROOM"
+        enum status "online/offline"
+        int cursorPosition "Current cursor location"
+        boolean typing "Is user typing"
+        string currentFileId FK "Currently open file"
+        datetime joinedAt
+        datetime lastActivity
+    }
+    
+    FILE_SYSTEM_ITEM {
+        string id PK "UUID"
+        string name "File or directory name"
+        enum type "file or directory"
+        string parentId FK "Parent directory ID (nullable)"
+        string content "File content (nullable for directories)"
+        boolean isOpen "Directory open state (nullable for files)"
+        string roomId FK "References ROOM"
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    CHAT_MESSAGE {
+        string id PK "UUID"
+        string roomId FK "References ROOM"
+        string username FK "References USER"
+        string message "Message content"
+        datetime timestamp "Message timestamp"
+    }
+    
+    DRAWING_DATA {
+        string roomId PK "References ROOM"
+        json snapshot "Tldraw canvas snapshot"
+        datetime lastUpdated
+    }
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>Entity Descriptions</h3>
+            
+            <div class="legend-item">
+                <strong>ROOM</strong> - Represents a collaboration session. Each room has a unique UUID identifier and can contain multiple users, files, and chat messages.
+            </div>
+            
+            <div class="legend-item">
+                <strong>USER</strong> - Represents a user connected to a room. Users are identified by their socket connection ID and username. Each user belongs to exactly one room and can edit files and send messages.
+            </div>
+            
+            <div class="legend-item">
+                <strong>FILE_SYSTEM_ITEM</strong> - Represents either a file or directory in the project structure. Supports hierarchical organization through parent-child relationships. Can be either a file (with content) or directory (with children).
+            </div>
+            
+            <div class="legend-item">
+                <strong>CHAT_MESSAGE</strong> - Represents a message sent in the room's chat. Each message is associated with a room and a user, and includes timestamp information.
+            </div>
+            
+            <div class="legend-item">
+                <strong>DRAWING_DATA</strong> - Represents the collaborative drawing canvas state for a room. Stores the Tldraw snapshot as JSON data.
+            </div>
+        </div>
+
+        <div class="note">
+            <strong>Note:</strong> This ERD represents the current in-memory data model. In a production environment with persistent storage, additional entities like User_Account, Room_Settings, and File_Version might be added. The current implementation uses session-based storage where data is cleared when the server restarts.
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#764ba2',
+                lineColor: '#667eea',
+                secondaryColor: '#f0f0f0',
+                tertiaryColor: '#fff'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>
+
+
