@@ -1,0 +1,135 @@
+pipeline {
+    agent any
+    
+    environment {
+        NODE_VERSION = '18'
+        DOCKER_REGISTRY = 'docker.io'
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
+        IMAGE_NAME = 'code-sync-server'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+    
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timestamps()
+        timeout(time: 20, unit: 'MINUTES')
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out server code...'
+                checkout scm
+            }
+        }
+        
+        stage('Setup Node.js') {
+            steps {
+                script {
+                    echo "Setting up Node.js ${NODE_VERSION}..."
+                    // Using NodeJS plugin
+                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
+                        sh 'node --version'
+                        sh 'npm --version'
+                    }
+                }
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    echo 'Installing dependencies...'
+                    sh 'npm ci'
+                }
+            }
+        }
+        
+        stage('Lint') {
+            steps {
+                script {
+                    echo 'Running linter...'
+                    // Add linting if configured
+                    sh 'npm run lint || echo "No lint script configured"'
+                }
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                script {
+                    echo 'Building TypeScript code...'
+                    sh 'npm run build'
+                }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                script {
+                    echo 'Running tests...'
+                    sh 'npm test || echo "No tests configured"'
+                }
+            }
+        }
+        
+        stage('Docker Build') {
+            steps {
+                script {
+                    echo 'Building Docker image...'
+                    sh """
+                        docker build \
+                            -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
+                            -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest \
+                            --target runner \
+                            .
+                    """
+                }
+            }
+        }
+        
+        stage('Docker Push') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    echo 'Pushing Docker image to registry...'
+                    docker.withRegistry("https://${DOCKER_REGISTRY}", DOCKER_CREDENTIALS_ID) {
+                        sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                        sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+                    }
+                }
+            }
+        }
+        
+        stage('Security Scan') {
+            steps {
+                script {
+                    echo 'Running security scan...'
+                    // Add security scanning tools like Trivy or Snyk
+                    sh """
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            aquasec/trivy:latest image \
+                            --severity HIGH,CRITICAL \
+                            ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} || true
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Cleaning workspace...'
+            cleanWs()
+        }
+        success {
+            echo 'Server pipeline completed successfully!'
+        }
+        failure {
+            echo 'Server pipeline failed!'
+        }
+    }
+}

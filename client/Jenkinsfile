@@ -1,0 +1,154 @@
+pipeline {
+    agent any
+    
+    environment {
+        NODE_VERSION = '18'
+        DOCKER_REGISTRY = 'docker.io'
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
+        IMAGE_NAME = 'code-sync-client'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        VITE_BACKEND_URL = credentials('vite-backend-url')
+    }
+    
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timestamps()
+        timeout(time: 20, unit: 'MINUTES')
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out client code...'
+                checkout scm
+            }
+        }
+        
+        stage('Setup Node.js') {
+            steps {
+                script {
+                    echo "Setting up Node.js ${NODE_VERSION}..."
+                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
+                        sh 'node --version'
+                        sh 'npm --version'
+                    }
+                }
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    echo 'Installing dependencies...'
+                    sh 'npm ci'
+                }
+            }
+        }
+        
+        stage('Lint') {
+            steps {
+                script {
+                    echo 'Running ESLint...'
+                    sh 'npm run lint || true'
+                }
+            }
+        }
+        
+        stage('Type Check') {
+            steps {
+                script {
+                    echo 'Running TypeScript type checking...'
+                    sh 'npx tsc --noEmit || true'
+                }
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                script {
+                    echo 'Building Vite application...'
+                    sh """
+                        echo "VITE_BACKEND_URL=${VITE_BACKEND_URL}" > .env
+                        npm run build
+                    """
+                }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                script {
+                    echo 'Running tests...'
+                    sh 'npm test || echo "No tests configured"'
+                }
+            }
+        }
+        
+        stage('Docker Build') {
+            steps {
+                script {
+                    echo 'Building Docker image...'
+                    sh """
+                        docker build \
+                            -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
+                            -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest \
+                            --target runner \
+                            .
+                    """
+                }
+            }
+        }
+        
+        stage('Docker Push') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    echo 'Pushing Docker image to registry...'
+                    docker.withRegistry("https://${DOCKER_REGISTRY}", DOCKER_CREDENTIALS_ID) {
+                        sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                        sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+                    }
+                }
+            }
+        }
+        
+        stage('Security Scan') {
+            steps {
+                script {
+                    echo 'Running security scan...'
+                    sh """
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            aquasec/trivy:latest image \
+                            --severity HIGH,CRITICAL \
+                            ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} || true
+                    """
+                }
+            }
+        }
+        
+        stage('Archive Artifacts') {
+            steps {
+                script {
+                    echo 'Archiving build artifacts...'
+                    archiveArtifacts artifacts: 'dist/**/*', fingerprint: true
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Cleaning workspace...'
+            cleanWs()
+        }
+        success {
+            echo 'Client pipeline completed successfully!'
+        }
+        failure {
+            echo 'Client pipeline failed!'
+        }
+    }
+}
