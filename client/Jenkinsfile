@@ -23,23 +23,15 @@ pipeline {
             }
         }
         
-        stage('Setup Node.js') {
-            steps {
-                script {
-                    echo "Setting up Node.js ${NODE_VERSION}..."
-                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
-                        sh 'node --version'
-                        sh 'npm --version'
-                    }
-                }
-            }
-        }
-        
         stage('Install Dependencies') {
             steps {
                 script {
                     echo 'Installing dependencies...'
-                    sh 'npm ci'
+                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
+                        sh 'node --version'
+                        sh 'npm --version'
+                        sh 'npm ci'
+                    }
                 }
             }
         }
@@ -48,7 +40,9 @@ pipeline {
             steps {
                 script {
                     echo 'Running ESLint...'
-                    sh 'npm run lint || true'
+                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
+                        sh 'npm run lint || true'
+                    }
                 }
             }
         }
@@ -57,7 +51,9 @@ pipeline {
             steps {
                 script {
                     echo 'Running TypeScript type checking...'
-                    sh 'npx tsc --noEmit || true'
+                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
+                        sh 'npx tsc --noEmit || true'
+                    }
                 }
             }
         }
@@ -66,10 +62,12 @@ pipeline {
             steps {
                 script {
                     echo 'Building Vite application...'
-                    sh """
-                        echo "VITE_BACKEND_URL=${VITE_BACKEND_URL}" > .env
-                        npm run build
-                    """
+                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
+                        sh """
+                            echo "VITE_BACKEND_URL=${VITE_BACKEND_URL}" > .env
+                            npm run build
+                        """
+                    }
                 }
             }
         }
@@ -78,7 +76,9 @@ pipeline {
             steps {
                 script {
                     echo 'Running tests...'
-                    sh 'npm test || echo "No tests configured"'
+                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
+                        sh 'npm test || echo "No tests configured"'
+                    }
                 }
             }
         }

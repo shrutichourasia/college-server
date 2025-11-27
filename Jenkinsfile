@@ -2,6 +2,7 @@ pipeline {
     agent any
     
     environment {
+        NODE_VERSION = '18'
         DOCKER_REGISTRY = 'docker.io'
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
         IMAGE_TAG = "${env.BUILD_NUMBER}"
@@ -29,8 +30,12 @@ pipeline {
                         script {
                             echo 'Building Server...'
                             dir('server') {
-                                sh 'npm ci'
-                                sh 'npm run build'
+                                nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
+                                    sh 'node --version'
+                                    sh 'npm --version'
+                                    sh 'npm ci'
+                                    sh 'npm run build'
+                                }
                             }
                         }
                     }
@@ -41,9 +46,13 @@ pipeline {
                         script {
                             echo 'Building Client...'
                             dir('client') {
-                                sh 'npm ci'
-                                sh 'npm run lint || true'
-                                sh 'npm run build'
+                                nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
+                                    sh 'node --version'
+                                    sh 'npm --version'
+                                    sh 'npm ci'
+                                    sh 'npm run lint || true'
+                                    sh 'npm run build'
+                                }
                             }
                         }
                     }
