@@ -24,61 +24,81 @@ pipeline {
         }
         
         stage('Install Dependencies') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 script {
                     echo 'Installing dependencies...'
-                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
-                        sh 'node --version'
-                        sh 'npm --version'
-                        sh 'npm ci'
-                    }
+                    sh 'node --version'
+                    sh 'npm --version'
+                    sh 'npm ci'
                 }
             }
         }
         
         stage('Lint') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 script {
                     echo 'Running ESLint...'
-                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
-                        sh 'npm run lint || true'
-                    }
+                    sh 'npm run lint || true'
                 }
             }
         }
         
         stage('Type Check') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 script {
                     echo 'Running TypeScript type checking...'
-                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
-                        sh 'npx tsc --noEmit || true'
-                    }
+                    sh 'npx tsc --noEmit || true'
                 }
             }
         }
         
         stage('Build') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 script {
                     echo 'Building Vite application...'
-                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
-                        sh """
-                            echo "VITE_BACKEND_URL=${VITE_BACKEND_URL}" > .env
-                            npm run build
-                        """
-                    }
+                    sh """
+                        echo "VITE_BACKEND_URL=${VITE_BACKEND_URL}" > .env
+                        npm run build
+                    """
                 }
             }
         }
         
         stage('Test') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 script {
                     echo 'Running tests...'
-                    nodejs(nodeJSInstallationName: "Node ${NODE_VERSION}") {
-                        sh 'npm test || echo "No tests configured"'
-                    }
+                    sh 'npm test || echo "No tests configured"'
                 }
             }
         }
